@@ -1,189 +1,183 @@
 <template>
- <div class="row justify-center">
-      <div style="display: flex; max-width: 800px; width: 100%; height: 200px;">
-        <q-calendar-day
-          ref="calendar"
-          v-model="selectedDate"
-          view="week"
-          :interval-minutes="60"
-          :interval-count="96"
-          :interval-height="60"
-          time-clicks-clamped
-          :selected-dates="selectedDates"
-          animated
-          bordered
-          @click-time="onToggleTime"
-          @change="onChange"
-          @moved="onMoved"
-          @click-date="onClickDate"
-          @click-interval="onClickInterval"
-          @click-head-intervals="onClickHeadIntervals"
-          @click-head-day="onClickHeadDay"
-        />
+  <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
+    <div class="calendar-header flex justify-between items-center mb-4">
+      <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
+      <div>
+        <!-- Arrow buttons for navigation -->
+        <button
+          class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800"
+          @click="onPrev"
+        >
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <button
+          class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800"
+          @click="onToday"
+        >
+          Today
+        </button>
+        <button
+          class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800"
+          @click="onNext"
+        >
+          <span class="material-icons">arrow_forward</span>
+        </button>
       </div>
     </div>
-</template>
 
+    <div class="calendar-body">
+      <q-calendar-day
+        ref="calendar"
+        v-model="selectedDate"
+        view="week"
+        :interval-minutes="60"
+        :interval-count="96"
+        :interval-height="60"
+        time-clicks-clamped
+        :selected-dates="selectedDates"
+        animated
+        bordered
+        @click-time="onToggleTime"
+        @change="onChange"
+        @moved="onMoved"
+        @click-date="onClickDate"
+        @click-interval="onClickInterval"
+        @click-head-intervals="onClickHeadIntervals"
+        @click-head-day="onClickHeadDay"
+        class="rounded border border-gray-200 shadow-sm"
+      />
+    </div>
+  </div>
+</template>
 
 <script>
 import {
   QCalendarDay,
   today,
   copyTimestamp,
-  getDateTime
-} from '@quasar/quasar-ui-qcalendar/src/index.js'
-import '@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass'
-import '@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass'
-import '@quasar/quasar-ui-qcalendar/src/QCalendarDay.sass'
+  getDateTime,
+} from "@quasar/quasar-ui-qcalendar/src/index.js";
+import "@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass";
+import "@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass";
+import "@quasar/quasar-ui-qcalendar/src/QCalendarDay.sass";
 
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'WeekSelectedIntervals',
+  name: "CalendarView",
   components: {
-    QCalendarDay
+    QCalendarDay,
   },
-  data () {
+  data() {
     return {
       selectedDate: today(),
-      selectedDates: []
-    }
+      selectedDates: [],
+    };
   },
   methods: {
-    onToggleTime ({ scope }) {
-      console.log('click-time (scope)', scope)
+    onToggleTime({ scope }) {
       if (scope === undefined) {
-        return
+        return;
       }
 
-      // make a copy of the timestamp
-      const ts = copyTimestamp(scope.timestamp)
+      const ts = copyTimestamp(scope.timestamp);
+      const t = getDateTime(ts);
 
-      // get date with time
-      const t = getDateTime(ts)
-
-      // toggle to/from array
       if (this.selectedDates.includes(t)) {
-        // remove the date
         for (let i = 0; i < this.selectedDates.length; ++i) {
-          if (t === this.selectedDates[ i ]) {
-            this.selectedDates.splice(i, 1)
-            break
+          if (t === this.selectedDates[i]) {
+            this.selectedDates.splice(i, 1);
+            break;
           }
         }
-      }
-      else {
-        // add the date if not outside
+      } else {
         if (scope.outside !== true) {
-          this.selectedDates.push(t)
+          this.selectedDates.push(t);
         }
       }
     },
-
-    onToday () {
-      this.$refs.calendar.moveToToday()
+    onToday() {
+      this.$refs.calendar.moveToToday();
     },
-    onPrev () {
-      this.$refs.calendar.prev()
+    onPrev() {
+      this.$refs.calendar.prev();
     },
-    onNext () {
-      this.$refs.calendar.next()
+    onNext() {
+      this.$refs.calendar.next();
     },
-    onMoved (data) {
-      console.log('onMoved', data)
+    onMoved(data) {
+      console.log("onMoved", data);
     },
-    onChange (data) {
-      console.log('onChange', data)
+    onChange(data) {
+      console.log("onChange", data);
     },
-    onClickDate (data) {
-      console.log('onClickDate', data)
+    onClickDate(data) {
+      console.log("onClickDate", data);
     },
-    // onClickTime (data) {
-    //   console.log('onClickTime', data)
-    // },
-    onClickInterval (data) {
-      console.log('onClickInterval', data)
+    onClickInterval(data) {
+      console.log("onClickInterval", data);
     },
-    onClickHeadIntervals (data) {
-      console.log('onClickHeadIntervals', data)
+    onClickHeadIntervals(data) {
+      console.log("onClickHeadIntervals", data);
     },
-    onClickHeadDay (data) {
-      console.log('onClickHeadDay', data)
-    }
-  }
-})
+    onClickHeadDay(data) {
+      console.log("onClickHeadDay", data);
+    },
+  },
+});
 </script>
 
 <style scoped>
-.item {
-  margin-top: 2rem;
+/* Calendar container styles */
+.calendar-container {
+  width: 99%;
+}
+
+/* Calendar header styles */
+.calendar-header h3 {
+  margin-bottom: 0;
+}
+
+.calendar-header {
   display: flex;
-  position: relative;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.details {
-  flex: 1;
-  margin-left: 1rem;
-}
-
-i {
+.calendar-header div {
   display: flex;
-  place-items: center;
-  place-content: center;
-  width: 32px;
-  height: 32px;
-
-  color: var(--color-text);
+  gap: 0.5rem; /* Adds spacing between buttons */
 }
 
-h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 0.4rem;
-  color: var(--color-heading);
+.calendar-header button {
+  transition: background-color 0.3s ease;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
 }
 
-@media (min-width: 1024px) {
-  .item {
-    margin-top: 0;
-    padding: 0.4rem 0 1rem calc(var(--section-gap) / 2);
-  }
+/* Material Icons */
+.material-icons {
+  font-size: 20px;
+}
 
-  i {
-    top: calc(50% - 25px);
-    left: -26px;
-    position: absolute;
-    border: 1px solid var(--color-border);
-    background: var(--color-background);
-    border-radius: 8px;
-    width: 50px;
-    height: 50px;
-  }
+/* Calendar body */
+.q-calendar {
+  background-color: #f9f9f9;
+}
 
-  .item:before {
-    content: ' ';
-    border-left: 1px solid var(--color-border);
-    position: absolute;
-    left: 0;
-    bottom: calc(50% + 25px);
-    height: calc(50% - 25px);
-  }
+.q-calendar-day__head {
+  background-color: #e5f4e3;
+  color: #1b4332;
+}
 
-  .item:after {
-    content: ' ';
-    border-left: 1px solid var(--color-border);
-    position: absolute;
-    left: 0;
-    top: calc(50% + 25px);
-    height: calc(50% - 25px);
-  }
+.q-calendar-day__interval {
+  color: #555;
+}
 
-  .item:first-of-type:before {
-    display: none;
-  }
-
-  .item:last-of-type:after {
-    display: none;
-  }
+/* Selected time styles */
+.q-calendar-day__interval--selected {
+  background-color: #d1e7dd !important;
+  color: #155724 !important;
 }
 </style>
