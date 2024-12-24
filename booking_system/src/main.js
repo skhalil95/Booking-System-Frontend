@@ -7,7 +7,7 @@ import { Quasar } from 'quasar';
 import 'quasar/dist/quasar.css';
 
 import { QCalendar } from '@quasar/quasar-ui-qcalendar';
-import { QDialog, QBtn, QCard, QCardSection, QCardActions, QInput, QSeparator } from 'quasar';
+import { QDialog, QBtn, QCard, QCardSection, QCardActions, QInput, QSeparator,QTooltip } from 'quasar';
 import '@quasar/quasar-ui-qcalendar/dist/index.css';
 import './output.css'
 
@@ -24,7 +24,8 @@ app.use(Quasar, {
     QCardSection,
     QCardActions,
     QInput,
-    QSeparator
+    QSeparator,
+    QTooltip
   },
 });
 
