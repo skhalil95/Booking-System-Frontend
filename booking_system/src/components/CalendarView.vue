@@ -1,92 +1,49 @@
 <template>
-   <BookingDialog
-      :is-open="isDialogOpen"
-      :booking-time="selectedBookingTime"
-      :reserve-handler="reserveHandler"
-      :close-handler="closeHandler"
-    />
+  <BookingDialog :is-open="isDialogOpen" :booking-time="selectedBookingTime" :reserve-handler="reserveHandler"
+    :close-handler="closeHandler" />
   <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
     <div class="calendar-header flex justify-between items-center mb-4">
       <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
       <div>
         <!-- Arrow buttons for navigation -->
-        <button
-          class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800"
-          @click="onPrev"
-        >
+        <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
           <span class="material-icons">arrow_back</span>
         </button>
-        <button
-          class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800"
-          @click="onToday"
-        >
+        <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
           Today
         </button>
-        <button
-          class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800"
-          @click="onNext"
-        >
+        <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
           <span class="material-icons">arrow_forward</span>
         </button>
       </div>
     </div>
 
     <div class="calendar-body">
-      <q-calendar-day
-        ref="calendar"
-        v-model="selectedDate"
-        view="week"
-        :interval-minutes="60"
-        :weekdays="[0,1,2,3,4]"
-        :disabled-before="disabledBefore"
-        :interval-count="12"
-        :interval-start="9"
-        :interval-height="60"
-        time-clicks-clamped
-        :selected-dates="selectedDates"
-        animated
-        bordered
-        @click-time="onToggleTime"
-        @change="onChange"
-        @moved="onMoved"
-        @click-date="onClickDate"
-        @click-interval="onClickInterval"
-        @click-head-intervals="onClickHeadIntervals"
-        @click-head-day="onClickHeadDay"
-        class="rounded border border-gray-200 shadow-sm"
-      >
-      <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
-            <template
-              v-for="event in getEvents(timestamp.date)"
-              :key="event.id"
-            >
-              <div
-                v-if="event.time !== undefined"
-                class="my-event"
-                :class="badgeClasses(event, 'body')"
-                :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)"
-              >
-                <span class="title q-calendar__ellipsis">
-                  {{ event.title }}
-                  <q-tooltip>{{ event.details }}</q-tooltip>
-                </span>
-              </div>
-            </template>
+      <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60" :weekdays="[0, 1, 2, 3, 4]"
+        :disabled-before="disabledBefore" :interval-count="12" :interval-start="9" :interval-height="60"
+        time-clicks-clamped :selected-dates="selectedDates" animated bordered @click-time="onToggleTime"
+        @change="onChange" @moved="onMoved" @click-date="onClickDate" @click-interval="onClickInterval"
+        @click-head-intervals="onClickHeadIntervals" @click-head-day="onClickHeadDay"
+        class="rounded border border-gray-200 shadow-sm">
+        <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
+          <template v-for="event in getEvents(timestamp.date)" :key="event.id">
+            <div v-if="event.time !== undefined" class="my-event" :class="badgeClasses(event, 'body')"
+              :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)">
+              <span class="title q-calendar__ellipsis">
+                {{ event.title }}
+                <q-tooltip>{{ event.details }}</q-tooltip>
+              </span>
+            </div>
           </template>
+        </template>
 
-      <template #day-container="{ scope: { days }}">
-            <template v-if="hasDate(days)">
-              <div
-                class="day-view-current-time-indicator"
-                :style="style"
-              ></div>
-              <div
-                class="day-view-current-time-line"
-                :style="style"
-              ></div>
-            </template>
+        <template #day-container="{ scope: { days } }">
+          <template v-if="hasDate(days)">
+            <div class="day-view-current-time-indicator" :style="style"></div>
+            <div class="day-view-current-time-line" :style="style"></div>
           </template>
-    </q-calendar-day>
+        </template>
+      </q-calendar-day>
     </div>
   </div>
 </template>
@@ -118,7 +75,7 @@ export default defineComponent({
     BookingDialog
   },
   computed: {
-    disabledBefore () {
+    disabledBefore() {
       let ts = parseTimestamp(today())
       ts = addToDate(ts, { day: -1 })
       return ts.date
@@ -128,23 +85,23 @@ export default defineComponent({
         top: this.timeStartPos + 'px'
       }
     },
-    eventsMap () {
+    eventsMap() {
       const map = {}
       // this.events.forEach(event => (map[ event.date ] = map[ event.date ] || []).push(event))
       this.events.forEach(event => {
-        if (!map[ event.date ]) {
-          map[ event.date ] = []
+        if (!map[event.date]) {
+          map[event.date] = []
         }
-        map[ event.date ].push(event)
+        map[event.date].push(event)
         if (event.days) {
           let timestamp = parseTimestamp(event.date)
           let days = event.days
           do {
             timestamp = addToDate(timestamp, { day: 1 })
-            if (!map[ timestamp.date ]) {
-              map[ timestamp.date ] = []
+            if (!map[timestamp.date]) {
+              map[timestamp.date] = []
             }
-            map[ timestamp.date ].push(event)
+            map[timestamp.date].push(event)
           } while (--days > 0)
         }
       })
@@ -212,7 +169,7 @@ export default defineComponent({
           id: 6,
           title: 'BOOKED',
           details: 'Teaching Javascript 101',
-          date: this.getCurrentDay(22),
+          date: this.getCurrentDay(24),
           time: '08:00',
           duration: 60,
           bgcolor: 'teal',
@@ -250,16 +207,16 @@ export default defineComponent({
     };
   },
   methods: {
-    getCurrentDay (day) {
-  const newDay = new Date(new Date())
-  newDay.setDate(day)
-  const tm = parseDate(newDay)
-  return tm.date
-},
-badgeClasses (event, type) {
+    getCurrentDay(day) {
+      const newDay = new Date(new Date())
+      newDay.setDate(day)
+      const tm = parseDate(newDay)
+      return tm.date
+    },
+    badgeClasses(event, type) {
       const isHeader = type === 'header'
       return {
-        [ `text-white bg-${ event.bgcolor }` ]: true,
+        [`text-white bg-${event.bgcolor}`]: true,
         'full-width': !isHeader && (!event.side || event.side === 'full'),
         'left-side': !isHeader && event.side === 'left',
         'right-side': !isHeader && event.side === 'right',
@@ -267,50 +224,50 @@ badgeClasses (event, type) {
       }
     },
 
-    badgeStyles (event, type, timeStartPos = undefined, timeDurationHeight = undefined) {
+    badgeStyles(event, type, timeStartPos = undefined, timeDurationHeight = undefined) {
       const s = {}
       if (timeStartPos && timeDurationHeight) {
         s.top = timeStartPos(event.time) + 'px'
         s.height = timeDurationHeight(event.duration) + 'px'
       }
-      s[ 'align-items' ] = 'flex-start'
+      s['align-items'] = 'flex-start'
       return s
     },
 
-    getEvents (dt) {
+    getEvents(dt) {
       // get all events for the specified date
-      const events = this.eventsMap[ dt ] || []
+      const events = this.eventsMap[dt] || []
 
       if (events.length === 1) {
-        events[ 0 ].side = 'full'
+        events[0].side = 'full'
       }
       else if (events.length === 2) {
         // this example does no more than 2 events per day
         // check if the two events overlap and if so, select
         // left or right side alignment to prevent overlap
-        const startTime = addToDate(parsed(events[ 0 ].date), { minute: parseTime(events[ 0 ].time) })
-        const endTime = addToDate(startTime, { minute: events[ 0 ].duration })
-        const startTime2 = addToDate(parsed(events[ 1 ].date), { minute: parseTime(events[ 1 ].time) })
-        const endTime2 = addToDate(startTime2, { minute: events[ 1 ].duration })
+        const startTime = addToDate(parsed(events[0].date), { minute: parseTime(events[0].time) })
+        const endTime = addToDate(startTime, { minute: events[0].duration })
+        const startTime2 = addToDate(parsed(events[1].date), { minute: parseTime(events[1].time) })
+        const endTime2 = addToDate(startTime2, { minute: events[1].duration })
         if (isBetweenDates(startTime2, startTime, endTime, true) || isBetweenDates(endTime2, startTime, endTime, true)) {
-          events[ 0 ].side = 'left'
-          events[ 1 ].side = 'right'
+          events[0].side = 'left'
+          events[1].side = 'right'
         }
         else {
-          events[ 0 ].side = 'full'
-          events[ 1 ].side = 'full'
+          events[0].side = 'full'
+          events[1].side = 'full'
         }
       }
 
       return events
     },
 
-    hasDate (days) {
+    hasDate(days) {
       return this.currentDate
         ? days.find(day => day.date === this.currentDate)
         : false
     },
-    adjustCurrentTime () {
+    adjustCurrentTime() {
       const now = parseDate(new Date())
       this.currentDate = now.date
       this.currentTime = now.time
@@ -377,10 +334,10 @@ badgeClasses (event, type) {
   },
   mounted() {
     this.adjustCurrentTime();
-      // now, adjust the time every minute
-      this.intervalId = setInterval(() => {
-        this.adjustCurrentTime()
-      }, 60000)
+    // now, adjust the time every minute
+    this.intervalId = setInterval(() => {
+      this.adjustCurrentTime()
+    }, 60000)
   },
   beforeUnmount() {
     clearInterval(this.intervalId);
@@ -407,7 +364,8 @@ badgeClasses (event, type) {
 
 .calendar-header div {
   display: flex;
-  gap: 0.5rem; /* Adds spacing between buttons */
+  gap: 0.5rem;
+  /* Adds spacing between buttons */
 }
 
 .calendar-header button {
@@ -539,6 +497,4 @@ badgeClasses (event, type) {
 .rounded-border {
   border-radius: 2px;
 }
-
-
 </style>
