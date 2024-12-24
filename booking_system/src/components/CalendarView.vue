@@ -19,23 +19,23 @@
     </div>
 
     <div class="calendar-body">
-      <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60" :weekdays="[0, 1, 2, 3, 4]"
-        :disabled-before="disabledBefore" :interval-count="12" :interval-start="9" :interval-height="60"
-        time-clicks-clamped :selected-dates="selectedDates" animated bordered @click-time="onToggleTime"
-        @change="onChange" @moved="onMoved" @click-date="onClickDate" @click-interval="onClickInterval"
-        @click-head-intervals="onClickHeadIntervals" @click-head-day="onClickHeadDay"
+      <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60"
+        :weekdays="[0, 1, 2, 3, 4]" :disabled-before="disabledBefore" :interval-count="24" :interval-start="9"
+        :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
+        @click-time="onToggleTime" @change="onChange" @moved="onMoved" @click-date="onClickDate"
+        @click-interval="onClickInterval" @click-head-intervals="onClickHeadIntervals" @click-head-day="onClickHeadDay"
         class="rounded border border-gray-200 shadow-sm">
         <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
           <template v-for="event in getEvents(timestamp.date)" :key="event.id">
             <div v-if="event.time !== undefined" class="my-event" :class="badgeClasses(event, 'body')"
               :style="badgeStyles(event, 'body', timeStartPos, timeDurationHeight)">
               <span class="title q-calendar__ellipsis">
-                {{ event.title }}
-                <q-tooltip>{{ event.details }}</q-tooltip>
+                {{ event.title === 'DISABLE' ? '' : 'BOOKED' }}
               </span>
             </div>
           </template>
         </template>
+
 
         <template #day-container="{ scope: { days } }">
           <template v-if="hasDate(days)">
@@ -124,7 +124,7 @@ export default defineComponent({
           id: 1,
           title: '1st of the Month',
           details: 'Everything is funny as long as it is happening to someone else',
-          date: this.getCurrentDay(1),
+          date: this.getCurrentDay(24),
           bgcolor: 'orange'
         },
         {
@@ -202,11 +202,62 @@ export default defineComponent({
           bgcolor: 'purple',
           icon: 'fas fa-plane',
           days: 5
-        }
+        },
+        { id: 10, title: 'DISABLE', date: this.getCurrentDay(24), time: '09:00', duration: 60 },
+        { id: 12, title: 'DISABLE', date: this.getCurrentDay(24), time: '16:00', duration: 60 }
       ]
     };
   },
   methods: {
+
+    addDisableEvents() {
+      const disableStartTime = "09:00"; // Starting time for disable intervals
+      const todayDate = new Date(); // Today's date
+      const todayTimestamp = this.getCurrentDay(todayDate.getDate()); // Today's formatted date
+      const currentTime = todayDate.toTimeString().slice(0, 5); // Current time in HH:mm format
+
+      // Parse starting date and time
+      let timestamp = parseTimestamp(this.getCurrentDay(todayDate.getDate())); // From the start of today
+      let startTime = parseTime(disableStartTime);
+
+      while (startTime < parseTime(currentTime)) {
+        const intervalStart = startTime;
+        const intervalEnd = startTime + 60; // Each interval is 1 hour (60 minutes)
+
+        // Check if the current time lies within this interval
+        const now = parseTime(currentTime);
+        if (now >= intervalStart && now < intervalEnd) {
+          // Skip this interval
+          startTime += 60; // Move to the next interval
+          continue;
+        }
+
+        // Create and add disable event
+        this.events.push({
+          id: this.events.length + 1, // Unique ID for the event
+          title: "DISABLE",
+          date: timestamp.date,
+          time: this.formatTime(intervalStart), // Format time as HH:mm
+          duration: 60, // Duration in minutes
+          bgcolor: "gray"
+        });
+
+        // Increment time by 1 hour (60 minutes)
+        startTime += 60;
+      }
+    },
+    formatTime(minutes) {
+      // Convert minutes to HH:mm format
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+    },
+    formatTime(minutes) {
+      // Convert minutes to HH:mm format
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}`;
+    },
     getCurrentDay(day) {
       const newDay = new Date(new Date())
       newDay.setDate(day)
@@ -214,6 +265,8 @@ export default defineComponent({
       return tm.date
     },
     badgeClasses(event, type) {
+      if (event.title === 'DISABLE')
+        return 'disabled-slot full-width'
       const isHeader = type === 'header'
       return {
         [`text-white bg-${event.bgcolor}`]: true,
@@ -257,7 +310,7 @@ export default defineComponent({
           events[0].side = 'full'
           events[1].side = 'full'
         }
-      }
+      } console.log(events)
 
       return events
     },
@@ -334,6 +387,7 @@ export default defineComponent({
   },
   mounted() {
     this.adjustCurrentTime();
+    this.addDisableEvents();
     // now, adjust the time every minute
     this.intervalId = setInterval(() => {
       this.adjustCurrentTime()
@@ -496,5 +550,10 @@ export default defineComponent({
 
 .rounded-border {
   border-radius: 2px;
+}
+
+.disabled-slot {
+  cursor: not-allowed;
+  /* Indicate non-clickable */
 }
 </style>
