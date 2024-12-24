@@ -1,4 +1,10 @@
 <template>
+   <BookingDialog
+      :is-open="isDialogOpen"
+      :booking-time="selectedBookingTime"
+      @close="isDialogOpen = false"
+      @confirm="onConfirmBooking"
+    />
   <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
     <div class="calendar-header flex justify-between items-center mb-4">
       <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
@@ -62,16 +68,20 @@ import "@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarDay.sass";
 
 import { defineComponent } from "vue";
+import BookingDialog from "./BookingDialog.vue";
 
 export default defineComponent({
   name: "CalendarView",
   components: {
     QCalendarDay,
+    BookingDialog
   },
   data() {
     return {
       selectedDate: today(),
       selectedDates: [],
+      isDialogOpen: false,
+      selectedBookingTime: "",
     };
   },
   methods: {
@@ -82,6 +92,8 @@ export default defineComponent({
 
       const ts = copyTimestamp(scope.timestamp);
       const t = getDateTime(ts);
+      this.selectedBookingTime = t;
+      this.isDialogOpen = true;
 
       if (this.selectedDates.includes(t)) {
         for (let i = 0; i < this.selectedDates.length; ++i) {
@@ -95,6 +107,10 @@ export default defineComponent({
           this.selectedDates.push(t);
         }
       }
+    },
+    onConfirmBooking(bookingTime) {
+      console.log("Booking Confirmed:", bookingTime);
+      this.isDialogOpen = false;
     },
     onToday() {
       this.$refs.calendar.moveToToday();
@@ -130,7 +146,7 @@ export default defineComponent({
 <style scoped>
 /* Calendar container styles */
 .calendar-container {
-  width: 99%;
+  width: 97%;
 }
 
 /* Calendar header styles */
