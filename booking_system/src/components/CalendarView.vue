@@ -2,8 +2,8 @@
    <BookingDialog
       :is-open="isDialogOpen"
       :booking-time="selectedBookingTime"
-      @close="isDialogOpen = false"
-      @confirm="onConfirmBooking"
+      :reserve-handler="reserveHandler"
+      :close-handler="closeHandler"
     />
   <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
     <div class="calendar-header flex justify-between items-center mb-4">
@@ -37,7 +37,10 @@
         v-model="selectedDate"
         view="week"
         :interval-minutes="60"
-        :interval-count="96"
+        :weekdays="[0,1,2,3,4]"
+        :disabled-before="disabledBefore"
+        :interval-count="7"
+        :interval-start="9"
         :interval-height="60"
         time-clicks-clamped
         :selected-dates="selectedDates"
@@ -62,6 +65,8 @@ import {
   today,
   copyTimestamp,
   getDateTime,
+  parseTimestamp,
+  addToDate
 } from "@quasar/quasar-ui-qcalendar/src/index.js";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarTransitions.sass";
@@ -75,6 +80,13 @@ export default defineComponent({
   components: {
     QCalendarDay,
     BookingDialog
+  },
+  computed: {
+    disabledBefore () {
+      let ts = parseTimestamp(today())
+      ts = addToDate(ts, { day: -1 })
+      return ts.date
+    },
   },
   data() {
     return {
@@ -108,8 +120,12 @@ export default defineComponent({
         }
       }
     },
-    onConfirmBooking(bookingTime) {
+    reserveHandler(bookingTime) {
       console.log("Booking Confirmed:", bookingTime);
+      this.isDialogOpen = false;
+    },
+    closeHandler() {
+      console.log("Booking Canceled");
       this.isDialogOpen = false;
     },
     onToday() {
