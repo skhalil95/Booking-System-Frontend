@@ -20,7 +20,7 @@
 
     <div class="calendar-body">
       <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60"
-        :weekdays="[0, 1, 2, 3, 4]" :disabled-before="disabledBefore" :interval-count="24" :interval-start="9"
+        :weekdays="[0, 1, 2, 3, 4]" :disabled-before="disabledBefore" :disabled-days="disabledDays()" :interval-count="7" :interval-start="9"
         :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
         @click-time="onToggleTime" @change="onChange" @moved="onMoved" @click-date="onClickDate"
         @click-interval="onClickInterval" @click-head-intervals="onClickHeadIntervals" @click-head-day="onClickHeadDay"
@@ -209,7 +209,13 @@ export default defineComponent({
     };
   },
   methods: {
+    disabledDays() {
+      const currentTime = new Date().getHours() * 60 + new Date().getMinutes(); // Current time in minutes
+      const fourPm = 16 * 60; // 4 PM in minutes
 
+      // Disable today if current time is past 4 PM
+      return currentTime >= fourPm ? [today()] : [];
+    },
     addDisableEvents() {
       const disableStartTime = "09:00"; // Starting time for disable intervals
       const todayDate = new Date(); // Today's date
@@ -310,7 +316,7 @@ export default defineComponent({
           events[0].side = 'full'
           events[1].side = 'full'
         }
-      } console.log(events)
+      }
 
       return events
     },
@@ -390,8 +396,16 @@ export default defineComponent({
     this.addDisableEvents();
     // now, adjust the time every minute
     this.intervalId = setInterval(() => {
-      this.adjustCurrentTime()
-    }, 60000)
+    const currentHour = new Date().getHours();
+    if (currentHour >= 9 && currentHour < 16) {
+      // Within working hours, adjust the current time
+      this.adjustCurrentTime();
+    } else {
+      // Outside working hours, stop polling
+      clearInterval(this.intervalId);
+      this.intervalId = null; // Reset interval ID
+    }
+  }, 60000); // Poll every minute
   },
   beforeUnmount() {
     clearInterval(this.intervalId);
