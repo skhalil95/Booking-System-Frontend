@@ -3,36 +3,49 @@
     <q-card class="q-pa-md rounded-lg shadow-lg dialog-card">
       <!-- Header -->
       <q-card-section class="dialog-header">
-        <div class="text-h6 text-white">Booking Details</div>
+        <div class="text-h6 text-white">{{ isSuccess ? "Booking Confirmed!" : "Booking Details" }}</div>
       </q-card-section>
 
       <!-- Body -->
       <q-card-section class="dialog-body">
-        <div class="q-mb-md">
-          <div class="q-mb-sm text-grey-8 row items-center">
-            <div class="q-mr-sm">Selected Time:</div>
+        <div v-if="!isSuccess">
+          <div class="q-mb-md">
+            <div class="q-mb-sm text-grey-8 row items-center">
+              <div class="q-mr-sm">Selected Time:</div>
+              <div class="green">{{ formattedBookingTime() }}</div>
+            </div>
+            <p class="text-body-2 text-grey-7">
+              Please fill in your details to confirm the booking.
+            </p>
+          </div>
+          <!-- Name Input -->
+          <q-input v-model="name" label="Name" outlined dense class="q-mb-md" placeholder="Enter your name"
+            :rules="[nameRule]" color="teal" />
+
+          <!-- Civil ID Input -->
+          <!-- Updated Civil ID Input -->
+          <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
+            class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="restrictCivilIdTo12Digits"
+            @keypress="validateKeyPress" color="teal" />
+        </div>
+        <div v-else class="text-center">
+          <p class="text-h6">Thank You, {{ name }}</p>
+          <p class="">Your booking has been successfully confirmed.</p>
+          <div class="row justify-center items-center">
+            <div class="q-mr-sm row items-center">Reserved Slot:</div>
             <div class="green">{{ formattedBookingTime() }}</div>
           </div>
-          <p class="text-body-2 text-grey-7">
-            Please fill in your details to confirm the booking.
-          </p>
+
+          <img :src="qrCodeUrl" alt="QR Code" class="q-mb-md" style="max-width: 200px; width: 100%;" />
         </div>
-
-        <!-- Name Input -->
-        <q-input v-model="name" label="Name" outlined dense class="q-mb-md" placeholder="Enter your name"
-          :rules="[nameRule]" color="teal" />
-
-        <!-- Civil ID Input -->
-        <!-- Updated Civil ID Input -->
-        <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
-          class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="validateCivilId"
-          @keypress="validateKeyPress" color="teal" />
       </q-card-section>
-        <q-separator class="grey-4" size="xs"/>
+      <q-separator class="grey-4" size="xs" />
       <!-- Footer -->
       <q-card-actions align="right">
-        <q-btn no-caps flat label="Cancel" color="teal" @click="closeHandler" class="btn-cancel" />
-        <q-btn no-caps label="Confirm" color="teal" @click="reserveHandler(bookingTime)" class="btn-confirm" />
+        <q-btn v-if="!isSuccess" no-caps flat label="Cancel" color="teal" @click="closeHandler" class="btn-cancel" />
+        <q-btn v-if="!isSuccess" no-caps label="Book" color="teal" :disable="isDisableConfirmBtn" @click="book()"
+          class="btn-confirm" />
+        <q-btn v-else no-caps label="Close" color="teal" @click="close" class="btn-confirm" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -63,6 +76,9 @@ export default {
     return {
       name: "",
       civilId: "",
+      startTime: "",
+      isSuccess: false,
+      qrCodeUrl: "",
     };
   },
   computed: {
@@ -72,14 +88,23 @@ export default {
       },
     },
     civilIdRule() {
-      return val => /^[0-9]{12}$/.test(val) || "Civil ID must be exactly 12 digits.";
+      return val => this.validateCivilId(val) || "Civil ID must be exactly 12 digits.";
     },
     nameRule() {
-      return val => (val && val.trim().length > 0) || "Name cannot be empty.";
+      return val => this.validateName(val) || "Name cannot be empty.";
     },
+    isDisableConfirmBtn() {
+      return !(this.validateName(this.name) && this.validateCivilId(this.civilId));
+    }
   },
   methods: {
-    validateCivilId() {
+    validateName(val) {
+      return val && val.trim().length > 0;
+    },
+    validateCivilId(val) {
+      return /^[0-9]{12}$/.test(val);
+    },
+    restrictCivilIdTo12Digits() {
       // Ensure Civil ID only contains digits and is not longer than 12
       this.civilId = this.civilId.replace(/[^0-9]/g, "").slice(0, 12);
     },
@@ -108,6 +133,30 @@ export default {
       const formattedDate = `${day}-${month}-${year}`;
 
       return `${formattedDate}, ${formattedStartHour}:${minute.toString().padStart(2, "0")} ${startPeriod} - ${formattedEndHour}:${minute.toString().padStart(2, "0")} ${endPeriod}`;
+    },
+    async book() {
+      const bookingObject = {
+        name: this.name,
+        civil_id: this.civilId,
+        start_time: this.bookingTime,
+      };
+
+      try {
+        const response = await this.reserveHandler(bookingObject);
+        this.qrCodeUrl = response.qr_code_url; // Assume backend sends QR code URL
+        this.isSuccess = true; // Change to success state
+        console.log(this.qrCodeUrl)
+      } catch (error) {
+        console.error("Booking failed", error);
+      }
+    },
+    close(){
+      this.name = "";
+      this.civilId = "";
+      this.startTime = "";
+      this.isSuccess = false;
+      this.qrCodeUrl = "";
+      this.closeDialog();
     }
 
   },

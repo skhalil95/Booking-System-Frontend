@@ -4,6 +4,8 @@ import './assets/main.css';
 
 
 import { Quasar } from 'quasar';
+
+import store from './store';
 import 'quasar/dist/quasar.css';
 
 import { QCalendar } from '@quasar/quasar-ui-qcalendar';
@@ -14,6 +16,8 @@ import './output.css'
 
 
 const app = createApp(App);
+
+app.use(store)
 
 app.use(Quasar, {
   components: {
