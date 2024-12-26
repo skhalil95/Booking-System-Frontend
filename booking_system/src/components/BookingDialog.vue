@@ -143,9 +143,8 @@ export default {
 
       try {
         const response = await this.reserveHandler(bookingObject);
-        this.qrCodeUrl = response.qr_code_url; // Assume backend sends QR code URL
+        this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.qr_code_url}`; // Assume backend sends QR code URL
         this.isSuccess = true; // Change to success state
-        console.log(this.qrCodeUrl)
       } catch (error) {
         console.error("Booking failed", error);
       }
@@ -156,7 +155,7 @@ export default {
       this.startTime = "";
       this.isSuccess = false;
       this.qrCodeUrl = "";
-      this.closeDialog();
+      this.closeHandler();
     }
 
   },

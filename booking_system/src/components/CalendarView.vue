@@ -20,10 +20,9 @@
 
     <div class="calendar-body">
       <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60"
-        :weekdays="[0, 1, 2, 3, 4]" :disabled-before="disabledBefore" focusable hoverable
-        :disabled-days="disabledDays()" :interval-count="7" :interval-start="9" :interval-height="60"
-        time-clicks-clamped :selected-dates="selectedDates" animated bordered @click-time="onSlotClick"
-        class="rounded border border-gray-200 shadow-sm">
+        :disabled-before="disabledBefore" focusable hoverable :disabled-days="disabledDays()" :interval-count="7"
+        :interval-start="9" :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
+        @click-time="onSlotClick" class="rounded border border-gray-200 shadow-sm">
         <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
           <template v-for="event in getEvents(timestamp.date)" :key="event.id">
             <div v-if="event.time !== undefined" class="my-event" :class="badgeClasses(event)"
