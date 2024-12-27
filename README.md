@@ -1,29 +1,57 @@
-# booking_system
+# Vue.js Slot Reservation Application
 
-This template should help get you started developing with Vue 3 in Vite.
+This is a Vue.js application for managing slot reservations and providing basic information about the organization. The application includes a sidebar for navigation and supports features like booking slots, downloading booking confirmation PDFs, and viewing details about the organization.
 
-## Recommended IDE Setup
+---
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Features
 
-## Customize configuration
+- **Slot Reservation:**
+  - View available slots.
+  - Book slots with name and civil ID.
+  - Download booking confirmation as a PDF.
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- **About Us Page:**
+  - Provides information about the organization.
 
-## Project Setup
+- **Sidebar Navigation:**
+  - Expandable and collapsible sidebar with intuitive navigation.
 
-```sh
-npm install
-```
+---
 
-### Compile and Hot-Reload for Development
+## Technology Stack
 
-```sh
-npm run dev
-```
+- **Frontend:**
+  - Vue.js 3
+  - Vue Router
+  - Vuex
+  - Quasar UI Framework
+  - Tailwind CSS
 
-### Compile and Minify for Production
+- **Backend API:**
+  - This app integrates with a RESTful API
 
-```sh
-npm run build
-```
+---
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed on your system:
+
+- Node.js
+- npm
+
+---
+
+## Installation
+
+1. cd booking_system
+2. npm install
+3. npm run dev
+
+## Backend URLs Configuration
+
+To ensure the frontend communicates with the backend correctly, make sure the following environment variables are correctly configured in your `.env` file located at the root of your project:
+
+```env
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/
+VITE_API_BASE_QR_URL=http://127.0.0.1:8000
