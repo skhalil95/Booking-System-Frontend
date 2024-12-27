@@ -1,4 +1,3 @@
-// src/types/booking.ts
 export interface IBookingDTO {
     id: number;
     name: string;
