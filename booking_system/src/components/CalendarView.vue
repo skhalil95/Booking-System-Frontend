@@ -26,7 +26,7 @@
     <!-- Body of the calendar displaying events -->
     <div class="calendar-body">
       <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="bookingDuration"
-        :disabled-before="disabledDaysBefore" focusable hoverable :interval-count="24" :disabled-days="disabledDays()"
+        :disabled-before="disabledDaysBefore" focusable hoverable :interval-count="7" :disabled-days="disabledDays()"
         :interval-start="bookingStartingWindow" :interval-height="bookingDuration" time-clicks-clamped
         :selected-dates="selectedDates" animated bordered @click-time="onSlotClick"
         class="rounded border border-gray-200 shadow-sm">
