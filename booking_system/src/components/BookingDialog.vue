@@ -185,6 +185,7 @@ export default {
         this.isSuccess = true;
       } catch (error) {
         console.error("Booking failed", error);
+        this.isLoading = false;
       }
     },
     // Close the dialog and reset data
