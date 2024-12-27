@@ -2,7 +2,7 @@
   <!-- Sidebar container -->
   <aside
     :class="[ 
-      'bg-green-900 text-white flex flex-col items-center transition-all duration-300',
+      'bg-blue-200 text-white flex flex-col items-center transition-all duration-300',
       isCollapsed ? 'w-16' : 'w-64'
     ]"
     @mouseover="expandSidebar"
@@ -21,13 +21,13 @@
         <li>
           <router-link
             to="/reserve"
-            class="flex items-center px-4 py-2 rounded hover:bg-green-700 transition"
-            :class="{ 'bg-green-700': $route.path === '/reserve' }"
+            class="flex items-center px-4 py-2 rounded hover:bg-blue-500 transition"
+            :class="{ 'bg-blue-500': $route.path === '/reserve' }"
           >
             <!-- Icon when sidebar is collapsed -->
-            <q-icon v-if="isCollapsed" name="event" size="sm" />
+            <q-icon v-if="isCollapsed" name="event" size="sm" class="color"/>
             <!-- Icon and label when sidebar is expanded -->
-            <span v-else class="flex items-center">
+            <span v-else class="flex items-center color">
               <q-icon name="event" size="sm" class="mr-2" />
               Reserve
             </span>
@@ -38,13 +38,13 @@
         <li>
           <router-link
             to="/about-us"
-            class="flex items-center px-4 py-2 rounded hover:bg-green-700 transition"
-            :class="{ 'bg-green-700': $route.path === '/about-us' }"
+            class="flex items-center px-4 py-2 rounded hover:bg-blue-500 transition"
+            :class="{ 'bg-blue-500': $route.path === '/about-us' }"
           >
             <!-- Icon when sidebar is collapsed -->
-            <q-icon v-if="isCollapsed" size="sm" name="groups" />
+            <q-icon v-if="isCollapsed" size="sm" name="groups" class="color"/>
             <!-- Icon and label when sidebar is expanded -->
-            <span v-else class="flex items-center">
+            <span v-else class="flex items-center  color">
               <q-icon name="groups" size="sm" class="mr-2" />
               About Us
             </span>
@@ -81,5 +81,9 @@ aside {
   height: 100vh; /* Ensures the sidebar takes the full viewport height */
   flex-shrink: 0; /* Prevent shrinking in flex layouts */
   overflow-y: auto; /* Add a scrollbar if the content overflows */
+}
+
+.color {
+  color: rgb(20, 0, 102);
 }
 </style>

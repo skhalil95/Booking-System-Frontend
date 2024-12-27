@@ -19,7 +19,7 @@
             <!-- Selected booking time display -->
             <div class="q-mb-sm text-grey-8 row items-center">
               <div class="q-mr-sm">Selected Time:</div>
-              <div class="green">{{ formattedBookingTime() }}</div>
+              <div class="text-blue-600">{{ formattedBookingTime() }}</div>
             </div>
             <p class="text-body-2 text-grey-7">
               Please fill in your details to confirm the booking.
@@ -28,12 +28,12 @@
 
           <!-- Name Input Field -->
           <q-input v-model="name" label="Name" outlined dense class="q-mb-md" placeholder="Enter your name"
-            :rules="[nameRule]" color="teal" />
+            :rules="[nameRule]" />
 
           <!-- Civil ID Input Field -->
           <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
             class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="restrictCivilIdTo12Digits"
-            @keypress="validateKeyPress" color="teal" />
+            @keypress="validateKeyPress"/>
         </div>
 
         <!-- Content displayed after booking confirmation -->
@@ -47,10 +47,10 @@
           <!-- Reserved time slot display -->
           <div class="row justify-center items-center">
             <div class="q-mr-sm row items-center">Reserved Slot:</div>
-            <div class="green">{{ formattedBookingTime() }}</div>
+            <div class="text-blue-600">{{ formattedBookingTime() }}</div>
           </div>
           <!-- Download Ticket Button -->
-          <q-btn outline color="teal" no-caps class="q-mt-md" icon="download" label="Download Ticket"
+          <q-btn outline no-caps class="q-mt-md btn-download" icon="download" label="Download Ticket"
             @click="downloadTicket" />
         </div>
       </q-card-section>
@@ -61,11 +61,11 @@
       <!-- Footer Section -->
       <q-card-actions align="right">
         <!-- Cancel and Confirm buttons when booking is not yet confirmed -->
-        <q-btn v-if="!isSuccess" no-caps flat label="Cancel" color="teal" @click="closeHandler" class="btn-cancel" />
-        <q-btn v-if="!isSuccess" no-caps label="Book" color="teal" :disable="isDisableConfirmBtn" @click="book()"
+        <q-btn v-if="!isSuccess" no-caps flat label="Cancel" @click="closeHandler" class="btn-cancel" />
+        <q-btn v-if="!isSuccess" no-caps label="Book" :disable="isDisableConfirmBtn" @click="book()"
           class="btn-confirm" />
         <!-- Close button after booking confirmation -->
-        <q-btn v-else no-caps label="Close" color="teal" @click="close" class="btn-confirm" />
+        <q-btn v-else no-caps label="Close" @click="close" class="btn-close" />
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -217,18 +217,26 @@ export default {
 }
 
 .dialog-header {
-  @apply bg-teal-600 text-white rounded-t-lg;
+  @apply bg-blue-800 text-white rounded-t-lg;
 }
 
 .btn-cancel {
-  @apply text-red-600 hover:bg-red-100;
+  @apply text-blue-800 hover:bg-blue-100;
 }
 
 .btn-confirm {
-  @apply text-green-700 hover:bg-green-100;
+  @apply bg-blue-800 text-white hover:bg-blue-100 hover:text-blue-800;
+}
+
+.btn-close {
+  @apply bg-blue-800 text-white hover:bg-blue-100 hover:text-blue-800;
 }
 
 .qr-code {
   @apply max-w-xs w-full;
+}
+
+.btn-download{
+  @apply text-blue-800 hover:bg-blue-100;
 }
 </style>

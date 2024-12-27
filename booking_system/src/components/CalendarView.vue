@@ -6,18 +6,18 @@
   <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
     <!-- Header for the calendar with navigation buttons -->
     <div class="calendar-header flex justify-between items-center mb-4">
-      <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
+      <h3 class="text-blue-900 text-xl font-bold">Weekly Calendar</h3>
       <div>
         <!-- Button to navigate to the previous week -->
-        <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
+        <button class="bg-blue-800 text-white px-2 py-1 rounded hover:bg-blue-900" @click="onPrev">
           <span class="material-icons">arrow_back</span>
         </button>
         <!-- Button to navigate to the current day -->
-        <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
+        <button class="bg-blue-800 text-white px-4 py-2 ml-2 rounded hover:bg-blue-900" @click="onToday">
           Today
         </button>
         <!-- Button to navigate to the next week -->
-        <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
+        <button class="bg-blue-800 text-white px-2 py-1 rounded ml-2 hover:bg-blue-900" @click="onNext">
           <span class="material-icons">arrow_forward</span>
         </button>
       </div>
@@ -227,7 +227,7 @@ export default defineComponent({
     badgeClasses(event) {
       if (event.title === "DISABLE") return "disabled-slot full-width";
       return {
-        "text-white bg-teal disabled-slot": true,
+        "text-white bg-blue-500 disabled-slot": true,
         "full-width": "full",
         "rounded-border": true,
       };
