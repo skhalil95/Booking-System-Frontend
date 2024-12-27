@@ -9,7 +9,7 @@
   >
     <!-- Logo -->
     <div class="flex justify-center items-center mt-4">
-      <img src="../assets/logo.svg" alt="Logo" class="h-10 w-auto" />
+      <img src="../assets/gust.svg" alt="Logo" class="h-10 w-auto" />
     </div>
     <!-- Navigation -->
     <nav class="mt-6 w-full">
