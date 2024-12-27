@@ -6,7 +6,7 @@ import CalendarView from './CalendarView.vue';
   <main class="p-6 flex-1">
     
     <!-- Include the calendar component -->
-    <CalendarView />
+    <router-view />
   </main>
 </template>
 

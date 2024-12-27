@@ -23,21 +23,24 @@
             :rules="[nameRule]" color="teal" />
 
           <!-- Civil ID Input -->
-          <!-- Updated Civil ID Input -->
           <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
             class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="restrictCivilIdTo12Digits"
             @keypress="validateKeyPress" color="teal" />
         </div>
         <div v-else class="text-center">
           <p class="text-h6">Thank You, {{ name }}</p>
-          <p class="">Your booking has been successfully confirmed.</p>
+          <p>Your booking has been successfully confirmed.</p>
+          <div class="row justify-center items-center q-mb-md">
+            <img :src="qrCodeUrl" alt="QR Code" class="qr-code" />
+          </div>
           <div class="row justify-center items-center">
             <div class="q-mr-sm row items-center">Reserved Slot:</div>
             <div class="green">{{ formattedBookingTime() }}</div>
           </div>
-
-          <img :src="qrCodeUrl" alt="QR Code" class="q-mb-md" style="max-width: 200px; width: 100%;" />
+          <!-- Download PDF Button -->
+          <q-btn outline color="teal" no-caps class="q-mt-md" icon="download" label="Download Ticket" @click="downloadTicket" />
         </div>
+
       </q-card-section>
       <q-separator class="grey-4" size="xs" />
       <!-- Footer -->
@@ -52,6 +55,7 @@
 </template>
 
 <script>
+import { mapActions } from "vuex";
 export default {
   name: "BookingDialog",
   props: {
@@ -79,6 +83,7 @@ export default {
       startTime: "",
       isSuccess: false,
       qrCodeUrl: "",
+      bookingId: "",
     };
   },
   computed: {
@@ -98,6 +103,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions("booking", ["downloadBookingPDF"]),
     validateName(val) {
       return val && val.trim().length > 0;
     },
@@ -144,59 +150,61 @@ export default {
       try {
         const response = await this.reserveHandler(bookingObject);
         this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.qr_code_url}`; // Assume backend sends QR code URL
+        this.bookingId = response.booking_id;
         this.isSuccess = true; // Change to success state
       } catch (error) {
         console.error("Booking failed", error);
       }
     },
-    close(){
+    close() {
       this.name = "";
       this.civilId = "";
       this.startTime = "";
       this.isSuccess = false;
       this.qrCodeUrl = "";
       this.closeHandler();
-    }
-
+    },
+    async downloadTicket() {
+       if (!this.bookingId) {
+        console.error("Booking ID is required to download the PDF.");
+        return;
+      }
+      try {
+        await this.downloadBookingPDF(this.bookingId);
+        this.$q.notify({ type: "positive", message: "PDF downloaded successfully!" });
+      } catch (error) {
+        console.error("Error downloading PDF:", error);
+        this.$q.notify({ type: "negative", message: "Failed to download PDF." });
+      }
+    },
   },
 };
 </script>
 
-
-<style scoped>
+<style lang="scss" scoped>
 .dialog-card {
   max-width: 500px;
   width: 100%;
+  @apply shadow-lg rounded-lg;
 }
 
 .dialog-header {
-  background-color: #00796b;
-  /* Teal */
-  color: white;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  @apply bg-teal-600 text-white rounded-t-lg;
 }
 
 .btn-cancel {
-  color: #d32f2f;
-  /* Red */
-}
-
-.btn-cancel:hover {
-  background-color: rgba(211, 47, 47, 0.1);
+  @apply text-red-600 hover:bg-red-100;
 }
 
 .btn-confirm {
-  color: #388e3c;
-  /* Green */
+  @apply text-green-700 hover:bg-green-100;
 }
 
-.btn-confirm:hover {
-  background-color: rgba(56, 142, 60, 0.1);
+.qr-code {
+  @apply max-w-xs w-full;
 }
 
-.text-primary {
-  color: #15803D;
-  /* Teal for time */
+.q-mt-md {
+  margin-top: 1rem;
 }
 </style>

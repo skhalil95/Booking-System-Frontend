@@ -3,19 +3,21 @@
     :close-handler="closeHandler" />
   <div class="calendar-container mx-auto p-4 shadow-lg bg-white rounded-lg">
     <div class="calendar-header flex justify-between items-center mb-4">
-      <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
-      <div>
-        <!-- Arrow buttons for navigation -->
-        <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
-          <span class="material-icons">arrow_back</span>
-        </button>
-        <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
-          Today
-        </button>
-        <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
-          <span class="material-icons">arrow_forward</span>
-        </button>
-      </div>
+      <h3 class="text-green-700 text-xl font-bold">
+        <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
+        </h3>
+        <div>
+          <!-- Arrow buttons for navigation -->
+          <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
+            <span class="material-icons">arrow_back</span>
+          </button>
+          <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
+            Today
+          </button>
+          <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
+            <span class="material-icons">arrow_forward</span>
+          </button>
+        </div>
     </div>
 
     <div class="calendar-body">
@@ -32,8 +34,13 @@
               </span>
             </div>
           </template>
-        </template>
+        </template> 
 
+          <template #column-header-before="{ scope }">
+            <div class="fit row justify-center">
+              <span>{{ getHeadDay(scope.timestamp.date) }}</span>
+            </div>
+          </template>
 
         <template #day-container="{ scope: { days } }">
           <template v-if="hasDate(days)">
@@ -137,6 +144,15 @@ export default defineComponent({
   },
   methods: {
     ...mapActions('booking', ['fetchBookings', 'createBooking']),
+    getHeadDay(timestamp) {
+
+      const date = new Date(timestamp);
+
+      // Use Intl.DateTimeFormat to get the full month name
+      const formatter = new Intl.DateTimeFormat("en-US", { month: "long" });
+      return formatter.format(date); // "December"
+      // return timestamp;
+    },
     async reserveHandler(bookingObject) {
       try {
         return await this.createBooking(bookingObject);
