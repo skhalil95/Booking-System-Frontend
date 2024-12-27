@@ -1,15 +1,22 @@
 <template>
+  <!-- QDialog component for booking confirmation/details -->
   <q-dialog v-model="dialogVisible" persistent transition-show="scale" transition-hide="scale">
+    <!-- Dialog content container -->
     <q-card class="q-pa-md rounded-lg shadow-lg dialog-card">
-      <!-- Header -->
+      <!-- Header Section -->
       <q-card-section class="dialog-header">
-        <div class="text-h6 text-white">{{ isSuccess ? "Booking Confirmed!" : "Booking Details" }}</div>
+        <div class="text-h6 text-white">
+          <!-- Display title based on success state -->
+          {{ isSuccess ? "Booking Confirmed!" : "Booking Details" }}
+        </div>
       </q-card-section>
 
-      <!-- Body -->
+      <!-- Body Section -->
       <q-card-section class="dialog-body">
+        <!-- Content displayed when booking is not yet confirmed -->
         <div v-if="!isSuccess">
           <div class="q-mb-md">
+            <!-- Selected booking time display -->
             <div class="q-mb-sm text-grey-8 row items-center">
               <div class="q-mr-sm">Selected Time:</div>
               <div class="green">{{ formattedBookingTime() }}</div>
@@ -18,36 +25,46 @@
               Please fill in your details to confirm the booking.
             </p>
           </div>
-          <!-- Name Input -->
+
+          <!-- Name Input Field -->
           <q-input v-model="name" label="Name" outlined dense class="q-mb-md" placeholder="Enter your name"
             :rules="[nameRule]" color="teal" />
 
-          <!-- Civil ID Input -->
+          <!-- Civil ID Input Field -->
           <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
             class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="restrictCivilIdTo12Digits"
             @keypress="validateKeyPress" color="teal" />
         </div>
+
+        <!-- Content displayed after booking confirmation -->
         <div v-else class="text-center">
           <p class="text-h6">Thank You, {{ name }}</p>
           <p>Your booking has been successfully confirmed.</p>
+          <!-- QR Code display -->
           <div class="row justify-center items-center q-mb-md">
             <img :src="qrCodeUrl" alt="QR Code" class="qr-code" />
           </div>
+          <!-- Reserved time slot display -->
           <div class="row justify-center items-center">
             <div class="q-mr-sm row items-center">Reserved Slot:</div>
             <div class="green">{{ formattedBookingTime() }}</div>
           </div>
-          <!-- Download PDF Button -->
-          <q-btn outline color="teal" no-caps class="q-mt-md" icon="download" label="Download Ticket" @click="downloadTicket" />
+          <!-- Download Ticket Button -->
+          <q-btn outline color="teal" no-caps class="q-mt-md" icon="download" label="Download Ticket"
+            @click="downloadTicket" />
         </div>
-
       </q-card-section>
+
+      <!-- Separator between body and footer -->
       <q-separator class="grey-4" size="xs" />
-      <!-- Footer -->
+
+      <!-- Footer Section -->
       <q-card-actions align="right">
+        <!-- Cancel and Confirm buttons when booking is not yet confirmed -->
         <q-btn v-if="!isSuccess" no-caps flat label="Cancel" color="teal" @click="closeHandler" class="btn-cancel" />
         <q-btn v-if="!isSuccess" no-caps label="Book" color="teal" :disable="isDisableConfirmBtn" @click="book()"
           class="btn-confirm" />
+        <!-- Close button after booking confirmation -->
         <q-btn v-else no-caps label="Close" color="teal" @click="close" class="btn-confirm" />
       </q-card-actions>
     </q-card>
@@ -56,71 +73,80 @@
 
 <script>
 import { mapActions } from "vuex";
+
 export default {
   name: "BookingDialog",
   props: {
     isOpen: {
-      type: Boolean,
+      type: Boolean, // Determines if the dialog is visible
       required: true,
     },
     bookingTime: {
-      type: String,
+      type: String, // The selected booking time
       default: "",
     },
     closeHandler: {
-      type: Function,
-      required: true
+      type: Function, // Function to close the dialog
+      required: true,
     },
     reserveHandler: {
-      type: Function,
-      required: true
-    }
+      type: Function, // Function to handle booking reservation
+      required: true,
+    },
   },
   data() {
     return {
-      name: "",
-      civilId: "",
-      startTime: "",
-      isSuccess: false,
-      qrCodeUrl: "",
-      bookingId: "",
+      name: "", // User's name
+      civilId: "", // User's civil ID
+      startTime: "", // Booking start time
+      isSuccess: false, // Booking success state
+      qrCodeUrl: "", // URL for the QR code
+      bookingId: "", // Booking ID for the confirmed booking
     };
   },
   computed: {
+    // Bind dialog visibility to the `isOpen` prop
     dialogVisible: {
       get() {
         return this.isOpen;
       },
     },
+    // Validation rule for Civil ID
     civilIdRule() {
-      return val => this.validateCivilId(val) || "Civil ID must be exactly 12 digits.";
+      return (val) => this.validateCivilId(val) || "Civil ID must be exactly 12 digits.";
     },
+    // Validation rule for Name
     nameRule() {
-      return val => this.validateName(val) || "Name cannot be empty.";
+      return (val) => this.validateName(val) || "Name cannot be empty.";
     },
+    // Disable confirm button if inputs are invalid
     isDisableConfirmBtn() {
       return !(this.validateName(this.name) && this.validateCivilId(this.civilId));
-    }
+    },
   },
   methods: {
-    ...mapActions("booking", ["downloadBookingPDF"]),
+    ...mapActions("booking", ["downloadBookingPDF"]), // Vuex action to download booking PDF
+
+    // Validate that the name is not empty
     validateName(val) {
       return val && val.trim().length > 0;
     },
+    // Validate that Civil ID is exactly 12 digits
     validateCivilId(val) {
       return /^[0-9]{12}$/.test(val);
     },
+    // Restrict Civil ID input to numeric characters and a maximum of 12 digits
     restrictCivilIdTo12Digits() {
-      // Ensure Civil ID only contains digits and is not longer than 12
       this.civilId = this.civilId.replace(/[^0-9]/g, "").slice(0, 12);
     },
+    // Prevent non-numeric characters in Civil ID input
     validateKeyPress(event) {
-      // Allow only numeric keys (48-57 for 0-9)
       const charCode = event.keyCode || event.which;
       if (charCode < 48 || charCode > 57) {
-        event.preventDefault(); // Prevent non-numeric input
+        event.preventDefault();
       }
     },
+    // Format the booking time for display
     formattedBookingTime() {
       if (!this.bookingTime) return "";
 
@@ -135,11 +161,11 @@ export default {
       const endPeriod = endHour >= 12 ? "pm" : "am";
       const formattedEndHour = ((endHour % 12) || 12).toString().padStart(2, "0");
 
-      // Format date to DD-MM-YYYY
       const formattedDate = `${day}-${month}-${year}`;
 
       return `${formattedDate}, ${formattedStartHour}:${minute.toString().padStart(2, "0")} ${startPeriod} - ${formattedEndHour}:${minute.toString().padStart(2, "0")} ${endPeriod}`;
     },
+    // Handle booking confirmation
     async book() {
       const bookingObject = {
         name: this.name,
@@ -149,13 +175,14 @@ export default {
 
       try {
         const response = await this.reserveHandler(bookingObject);
-        this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.booking.qr_code}`; // Assume backend sends QR code URL
+        this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.booking.qr_code}`;
         this.bookingId = response.booking.id;
-        this.isSuccess = true; // Change to success state
+        this.isSuccess = true;
       } catch (error) {
         console.error("Booking failed", error);
       }
     },
+    // Close the dialog and reset data
     close() {
       this.name = "";
       this.civilId = "";
@@ -164,8 +191,9 @@ export default {
       this.qrCodeUrl = "";
       this.closeHandler();
     },
+    // Download the ticket as a PDF
     async downloadTicket() {
-       if (!this.bookingId) {
+      if (!this.bookingId) {
         console.error("Booking ID is required to download the PDF.");
         return;
       }
@@ -202,9 +230,5 @@ export default {
 
 .qr-code {
   @apply max-w-xs w-full;
-}
-
-.q-mt-md {
-  margin-top: 1rem;
 }
 </style>

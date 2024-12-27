@@ -4,12 +4,6 @@ import CalendarView from './CalendarView.vue';
 
 <template>
   <main class="p-6 flex-1">
-    
-    <!-- Include the calendar component -->
     <router-view />
   </main>
 </template>
-
-<style>
-/* Optional additional styles for MainContent */
-</style>

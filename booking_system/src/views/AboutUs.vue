@@ -46,17 +46,17 @@ export default {
 <style scoped>
 .about-us-container {
   height: 80vh;
-  flex: 1; /* Occupy remaining space in flex layout */
-  overflow-y: auto; /* Enable scrolling for overflow content */
+  flex: 1;
+  overflow-y: auto;
 }
 
 .about-us-content {
-  max-width: 768px; /* Restrict maximum width */
-  padding: 1.5rem; /* Internal spacing */
-  margin: 0 auto; /* Center horizontally */
-  background-color: #ffffff; /* White background */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
-  border-radius: 12px; /* Rounded corners */
+  max-width: 768px;
+  padding: 1.5rem;
+  margin: 0 auto;
+  background-color: #ffffff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
 }
 
 
