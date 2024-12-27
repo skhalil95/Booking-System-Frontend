@@ -5,6 +5,6 @@ export interface IBookingDTO {
     civil_id: number;
     start_time: string;
     end_time: string;
-    qr_code_url: string;
+    qr_code: string;
   }
   
