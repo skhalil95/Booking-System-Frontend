@@ -21,9 +21,9 @@
     </div>
 
     <div class="calendar-body">
-      <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60"
-        :disabled-before="disabledDaysBefore" focusable hoverable :interval-count="24":disabled-days="disabledDays()" :interval-start="9"
-        :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
+      <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="bookingDuration"
+        :disabled-before="disabledDaysBefore" focusable hoverable :interval-count="24":disabled-days="disabledDays()" :interval-start="bookingStartingWindow"
+        :interval-height="bookingDuration" time-clicks-clamped :selected-dates="selectedDates" animated bordered
         @click-time="onSlotClick" class="rounded border border-gray-200 shadow-sm">
         <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
           <template v-for="event in getEventsByDate(timestamp.date)" :key="event.id">
@@ -142,6 +142,9 @@ export default defineComponent({
       currentTime: null,
       timeStartPos: 0,
       intervalId: null,
+      bookingDuration: 60,
+      bookingStartingWindow: 9,
+      bookingEndingWindow: 16
     }
   },
   methods: {
@@ -165,14 +168,14 @@ export default defineComponent({
     },
     disabledDays() {
       const currentTime = new Date().getHours() * 60 + new Date().getMinutes(); // Current time in minutes
-      const fourPm = 16 * 60; // 4 PM in minutes
+      const fourPm = this.bookingEndingWindow * 60; // 4 PM in minutes
 
       // Disable today if current time is past 4 PM
       return currentTime >= fourPm ? [today()] : [];
     },
     addDisableSlots() {
       let disabledSlots = [];
-      const disableStartTime = "09:00"; // Starting time for disable intervals
+      const disableStartTime = `0${this.bookingStartingWindow}:00`;; // Starting time for disable intervals
       const todayDate = new Date(); // Today's date
       const currentTime = todayDate.toTimeString().slice(0, 5); // Current time in HH:mm format
 
@@ -182,13 +185,13 @@ export default defineComponent({
 
       while (startTime < parseTime(currentTime)) {
         const intervalStart = startTime;
-        const intervalEnd = startTime + 60; // Each interval is 1 hour (60 minutes)
+        const intervalEnd = startTime + this.bookingDuration; // Each interval is 1 hour (60 minutes)
 
         // Check if the current time lies within this interval
         const now = parseTime(currentTime);
         if (now >= intervalStart && now < intervalEnd) {
           // Skip this interval
-          startTime += 60; // Move to the next interval
+          startTime += this.bookingDuration; // Move to the next interval
           continue;
         }
 
@@ -198,11 +201,11 @@ export default defineComponent({
           title: "DISABLE",
           date: timestamp.date,
           time: this.formatTime(intervalStart), // Format time as HH:mm
-          duration: 60, // Duration in minutes
+          duration: this.bookingDuration, // Duration in minutes
         });
 
         // Increment time by 1 hour (60 minutes)
-        startTime += 60;
+        startTime += this.bookingDuration;
       }
       return disabledSlots;
     },
@@ -313,7 +316,7 @@ export default defineComponent({
     // now, adjust the time every minute
     this.intervalId = setInterval(() => {
       const currentHour = new Date().getHours();
-      if (currentHour >= 9 && currentHour < 16) {
+      if (currentHour >= this.bookingStartingWindow && currentHour < this.bookingEndingWindow) {
         // Within working hours, adjust the current time
         this.adjustCurrentTime();
       } else {
