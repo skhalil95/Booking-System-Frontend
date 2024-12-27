@@ -149,8 +149,8 @@ export default {
 
       try {
         const response = await this.reserveHandler(bookingObject);
-        this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.qr_code_url}`; // Assume backend sends QR code URL
-        this.bookingId = response.booking_id;
+        this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.booking.qr_code}`; // Assume backend sends QR code URL
+        this.bookingId = response.booking.id;
         this.isSuccess = true; // Change to success state
       } catch (error) {
         console.error("Booking failed", error);
