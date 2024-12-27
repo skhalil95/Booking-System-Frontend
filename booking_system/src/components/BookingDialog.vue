@@ -14,7 +14,10 @@
       <!-- Body Section -->
       <q-card-section class="dialog-body">
         <!-- Content displayed when booking is not yet confirmed -->
-        <div v-if="!isSuccess">
+        <div v-if="isLoading" class="row items-center justify-center">
+          <q-spinner color="primary" size="6em" :thickness="2" />
+        </div>
+        <div v-else-if="!isSuccess">
           <div class="q-mb-md">
             <!-- Selected booking time display -->
             <div class="q-mb-sm text-grey-8 row items-center">
@@ -33,9 +36,8 @@
           <!-- Civil ID Input Field -->
           <q-input v-model="civilId" label="Civil ID" outlined dense type="text" maxlength="12" :rules="[civilIdRule]"
             class="q-mb-md" placeholder="Enter your Civil ID (12 digits)" @input="restrictCivilIdTo12Digits"
-            @keypress="validateKeyPress"/>
+            @keypress="validateKeyPress" />
         </div>
-
         <!-- Content displayed after booking confirmation -->
         <div v-else class="text-center">
           <p class="text-h6">Thank You, {{ name }}</p>
@@ -102,6 +104,7 @@ export default {
       isSuccess: false, // Booking success state
       qrCodeUrl: "", // URL for the QR code
       bookingId: "", // Booking ID for the confirmed booking
+      isLoading: false, // Loading flag for veiwing spinner
     };
   },
   computed: {
@@ -121,7 +124,7 @@ export default {
     },
     // Disable confirm button if inputs are invalid
     isDisableConfirmBtn() {
-      return !(this.validateName(this.name) && this.validateCivilId(this.civilId));
+      return !(this.validateName(this.name) && this.validateCivilId(this.civilId)) || this.isLoading;
     },
   },
   methods: {
@@ -167,6 +170,7 @@ export default {
     },
     // Handle booking confirmation
     async book() {
+      this.isLoading = true;
       const bookingObject = {
         name: this.name,
         civil_id: this.civilId,
@@ -177,6 +181,7 @@ export default {
         const response = await this.reserveHandler(bookingObject);
         this.qrCodeUrl = `${import.meta.env.VITE_API_BASE_QR_URL}${response.booking.qr_code}`;
         this.bookingId = response.booking.id;
+        this.isLoading = false;
         this.isSuccess = true;
       } catch (error) {
         console.error("Booking failed", error);
@@ -236,7 +241,7 @@ export default {
   @apply max-w-xs w-full;
 }
 
-.btn-download{
+.btn-download {
   @apply text-blue-800 hover:bg-blue-100;
 }
 </style>
