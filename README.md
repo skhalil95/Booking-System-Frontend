@@ -1,4 +1,4 @@
-# Vue.js Slot Reservation Application
+# Reservation Booking System
 
 This is a Vue.js application for managing slot reservations and providing basic information about the organization. The application includes a sidebar for navigation and supports features like booking slots, downloading booking confirmation PDFs, and viewing details about the organization.
 
