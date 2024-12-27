@@ -5,28 +5,28 @@
     <div class="calendar-header flex justify-between items-center mb-4">
       <h3 class="text-green-700 text-xl font-bold">
         <h3 class="text-green-700 text-xl font-bold">Weekly Calendar</h3>
-        </h3>
-        <div>
-          <!-- Arrow buttons for navigation -->
-          <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
-            <span class="material-icons">arrow_back</span>
-          </button>
-          <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
-            Today
-          </button>
-          <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
-            <span class="material-icons">arrow_forward</span>
-          </button>
-        </div>
+      </h3>
+      <div>
+        <!-- Arrow buttons for navigation -->
+        <button class="bg-green-700 text-white px-2 py-1 rounded hover:bg-green-800" @click="onPrev">
+          <span class="material-icons">arrow_back</span>
+        </button>
+        <button class="bg-green-700 text-white px-4 py-2 ml-2 rounded hover:bg-green-800" @click="onToday">
+          Today
+        </button>
+        <button class="bg-green-700 text-white px-2 py-1 rounded ml-2 hover:bg-green-800" @click="onNext">
+          <span class="material-icons">arrow_forward</span>
+        </button>
+      </div>
     </div>
 
     <div class="calendar-body">
       <q-calendar-day ref="calendar" v-model="selectedDate" view="week" :interval-minutes="60"
-        :disabled-before="disabledBefore" focusable hoverable :disabled-days="disabledDays()" :interval-count="7"
-        :interval-start="9" :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
+        :disabled-before="disabledDaysBefore" focusable hoverable :interval-count="24":disabled-days="disabledDays()" :interval-start="9"
+        :interval-height="60" time-clicks-clamped :selected-dates="selectedDates" animated bordered
         @click-time="onSlotClick" class="rounded border border-gray-200 shadow-sm">
         <template #day-body="{ scope: { timestamp, timeStartPos, timeDurationHeight } }">
-          <template v-for="event in getEvents(timestamp.date)" :key="event.id">
+          <template v-for="event in getEventsByDate(timestamp.date)" :key="event.id">
             <div v-if="event.time !== undefined" class="my-event" :class="badgeClasses(event)"
               :style="badgeStyles(event, timeStartPos, timeDurationHeight)">
               <span class="title q-calendar__ellipsis">
@@ -34,18 +34,18 @@
               </span>
             </div>
           </template>
-        </template> 
+        </template>
 
-          <template #column-header-before="{ scope }">
-            <div class="fit row justify-center">
-              <span>{{ getHeadDay(scope.timestamp.date) }}</span>
-            </div>
-          </template>
+        <template #column-header-before="{ scope }">
+          <div class="fit row justify-center">
+            <span>{{  getMonth(scope.timestamp.date) }}</span>
+          </div>
+        </template>
 
         <template #day-container="{ scope: { days } }">
-          <template v-if="hasDate(days)">
-            <div class="day-view-current-time-indicator" :style="style"></div>
-            <div class="day-view-current-time-line" :style="style"></div>
+          <template v-if="hasDateInWeek(days)">
+            <div class="day-view-current-time-indicator" :style="styleTimeIndicator"></div>
+            <div class="day-view-current-time-line" :style="styleTimeIndicator"></div>
           </template>
         </template>
       </q-calendar-day>
@@ -79,9 +79,9 @@ export default defineComponent({
     BookingDialog
   },
   computed: {
-    ...mapGetters('booking', ['allBookings', 'isLoading', 'errorMessage']),
+    ...mapGetters('booking', ['allBookings']),
     events() {
-      return this.allBookings.bookings?.map(booking => {
+      let incomingBookings = this.allBookings.bookings?.map(booking => {
         // Calculate duration in minutes
         const startTime = new Date(booking.start_time);
         const endTime = new Date(booking.end_time);
@@ -96,13 +96,15 @@ export default defineComponent({
           bgcolor: 'teal',
         };
       });
+      incomingBookings = incomingBookings?.concat(this.addDisableSlots())
+      return incomingBookings;
     },
-    disabledBefore() {
+    disabledDaysBefore() {
       let ts = parseTimestamp(today())
       ts = addToDate(ts, { day: -1 })
       return ts.date
     },
-    style() {
+    styleTimeIndicator() {
       return {
         top: this.timeStartPos + 'px'
       }
@@ -144,7 +146,7 @@ export default defineComponent({
   },
   methods: {
     ...mapActions('booking', ['fetchBookings', 'createBooking']),
-    getHeadDay(timestamp) {
+    getMonth(timestamp) {
 
       const date = new Date(timestamp);
 
@@ -168,7 +170,8 @@ export default defineComponent({
       // Disable today if current time is past 4 PM
       return currentTime >= fourPm ? [today()] : [];
     },
-    addDisableEvents() {
+    addDisableSlots() {
+      let disabledSlots = [];
       const disableStartTime = "09:00"; // Starting time for disable intervals
       const todayDate = new Date(); // Today's date
       const currentTime = todayDate.toTimeString().slice(0, 5); // Current time in HH:mm format
@@ -190,18 +193,18 @@ export default defineComponent({
         }
 
         // Create and add disable event
-        this.events.push({
-          id: this.events.length + 1, // Unique ID for the event
+        disabledSlots.push({
+          id: this.allBookings.bookings.length + disabledSlots.length + 1,
           title: "DISABLE",
           date: timestamp.date,
           time: this.formatTime(intervalStart), // Format time as HH:mm
           duration: 60, // Duration in minutes
-          bgcolor: "gray"
         });
 
         // Increment time by 1 hour (60 minutes)
         startTime += 60;
       }
+      return disabledSlots;
     },
     formatTime(minutes) {
       // Convert minutes to HH:mm format
@@ -235,7 +238,7 @@ export default defineComponent({
       return s
     },
 
-    getEvents(dt) {
+    getEventsByDate(dt) {
       // get all events for the specified date
       const events = this.eventsMap[dt] || []
 
@@ -245,7 +248,7 @@ export default defineComponent({
       return events
     },
 
-    hasDate(days) {
+    hasDateInWeek(days) {
       return this.currentDate
         ? days.find(day => day.date === this.currentDate)
         : false
@@ -258,27 +261,39 @@ export default defineComponent({
     },
     onSlotClick({ scope }) {
       if (!scope || !scope.timestamp) {
-        return;
+        return; // Exit if scope or timestamp is invalid
       }
 
       const now = new Date();
-      const slotDateTime = new Date(scope.timestamp.date);
+      const nowDate = now.toISOString().split('T')[0]; // Current date as 'YYYY-MM-DD'
+      const nowTime = now.toTimeString().split(' ')[0]; // Current time as 'HH:mm:ss'
 
-      //preventing booking past slots
+      const slotDate = scope.timestamp.date; // Expected 'YYYY-MM-DD'
+      const slotTime = scope.timestamp.time; // Expected 'HH:mm:ss'
+
+      // Convert time to minutes since midnight for comparison
+      const [nowHours, nowMinutes, nowSeconds] = nowTime.split(':').map(Number);
+      const [slotHours, slotMinutes, slotSeconds] = slotTime.split(':').map(Number);
+
+      const nowTotalSeconds = nowHours * 3600 + nowMinutes * 60 + nowSeconds;
+      const slotTotalSeconds = slotHours * 3600 + slotMinutes * 60 + slotSeconds;
+
+      // Prevent booking past slots
       if (
-        slotDateTime < now &&
-        (slotDateTime.getDate() !== now.getDate() || slotDateTime.getHours() < now.getHours())
-      ) {
-        console.log("Slot is in the past");
+        slotDate < nowDate ||
+        (slotDate === nowDate && slotTotalSeconds < nowTotalSeconds)
+      ) 
         return;
-      }
 
-
-      const ts = copyTimestamp(scope.timestamp);
-      const t = getDateTime(ts);
+      // Copy and set the selected booking time
+      const ts = copyTimestamp(scope.timestamp); // Assumes this creates a deep copy
+      const t = getDateTime(ts); // Convert timestamp to desired format
       this.selectedBookingTime = t;
+
+      // Open booking dialog
       this.isDialogOpen = true;
-    },
+    }
+    ,
     closeHandler() {
       this.isDialogOpen = false;
     },
@@ -295,7 +310,6 @@ export default defineComponent({
   mounted() {
     this.fetchBookings();
     this.adjustCurrentTime();
-    // this.addDisableEvents();
     // now, adjust the time every minute
     this.intervalId = setInterval(() => {
       const currentHour = new Date().getHours();
@@ -320,56 +334,25 @@ export default defineComponent({
 .calendar-container {
   width: 97%;
 }
-
 /* Calendar header styles */
 .calendar-header h3 {
   margin-bottom: 0;
 }
-
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .calendar-header div {
   display: flex;
   gap: 0.5rem;
-  /* Adds spacing between buttons */
 }
-
-.calendar-header button {
-  transition: background-color 0.3s ease;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* Material Icons */
 .material-icons {
   font-size: 20px;
 }
-
-/* Calendar body */
-.q-calendar {
-  background-color: #f9f9f9;
-}
-
-.q-calendar-day__head {
-  background-color: #e5f4e3;
-  color: #1b4332;
-}
-
 .q-calendar-day__interval {
   color: #555;
 }
-
-/* Selected time styles */
-.q-calendar-day__interval--selected {
-  background-color: #d1e7dd !important;
-  color: #155724 !important;
-}
-
 .day-view-current-time-indicator {
   position: absolute;
   left: -5px;
@@ -379,26 +362,12 @@ export default defineComponent({
   background-color: rgba(0, 0, 255, 0.5);
   border-radius: 50%;
 }
-
 .day-view-current-time-line {
   position: absolute;
   left: 5px;
   border-top: 2px solid rgba(0, 0, 255, 0.5);
   width: calc(100% - 5px);
 }
-
-.q-dark .day-view-current-time-indicator,
-.body--dark .day-view-current-time-indicator,
-.q-calendar--dark .day-view-current-time-indicator {
-  background-color: rgba(255, 255, 0, 0.85);
-}
-
-.q-dark .day-view-current-time-line,
-.body--dark .day-view-current-time-line,
-.q-calendar--dark .day-view-current-time-line {
-  border-top: 2px solid rgba(255, 255, 0, 0.85);
-}
-
 .my-event {
   position: absolute;
   font-size: 12px;
@@ -408,7 +377,6 @@ export default defineComponent({
   overflow: hidden;
   cursor: pointer;
 }
-
 .title {
   position: relative;
   display: flex;
@@ -416,25 +384,9 @@ export default defineComponent({
   align-items: center;
   height: 100%;
 }
-
-.bg-teal {
-  background: teal;
-}
-
-.bg-grey {
-  background: grey;
-}
-
-
-.full-width {
-  left: 0;
-  width: calc(100% - 2px);
-}
-
 .rounded-border {
   border-radius: 3px;
 }
-
 .disabled-slot {
   cursor: not-allowed;
   /* Indicate non-clickable */
