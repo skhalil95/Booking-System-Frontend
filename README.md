@@ -55,3 +55,12 @@ To ensure the frontend communicates with the backend correctly, make sure the fo
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000/api/
 VITE_API_BASE_QR_URL=http://127.0.0.1:8000
+```
+
+---
+
+## Assumptions
+
+1. Reservation Slot Duration: Each reservation slot is fixed at 60 minutes.
+2. Slot Availability: Slots are available daily between 9:00 AM and 4:00 PM.
+3. Weekly Calendar Scope: The booking system is designed to manage reservations on a weekly basis, focusing on short-term planning rather than long-term or yearly reservations.
